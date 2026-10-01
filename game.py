@@ -102,14 +102,18 @@ class Game:
             battery.alive, battery.ammo = True, AMMO_PER_BATTERY
 
     def nearest_battery(self, target):
-        return min(self.batteries, key=lambda b: b.pos.distance_squared_to(target))
+        available = [b for b in self.batteries if b.alive and b.ammo > 0]
+        if not available:
+            return None
+        return min(available, key=lambda b: b.pos.distance_squared_to(target))
 
     def launch(self, target):
         target = pygame.Vector2(target)
         if self.state != "play" or target.y > GROUND_Y - 20:
             return
+
         battery = self.nearest_battery(target)
-        if battery.alive and battery.ammo > 0:
+        if battery is not None:
             battery.ammo -= 1
             self.interceptors.append(Interceptor(battery.pos, target))
 
